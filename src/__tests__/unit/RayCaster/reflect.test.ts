@@ -1,4 +1,4 @@
-import RayCaster         from "../../../Services/SceneRendering/RayCaster.js";
+import RayCaster         from "../../../systems/SceneRendering/RayCaster.js";
 import CollisionDetector from "../../../utils/physics/CollisionDetector.js";
 import Vector2D          from "../../../utils/physics/Vector2D.js";
 
