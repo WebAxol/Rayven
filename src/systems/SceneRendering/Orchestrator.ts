@@ -15,7 +15,6 @@ import canvases           from "../../setup/canvases.js";
 
 const ctx :any = canvases.canvas2d.getContext('2d');
 
-
 class RenderingPipeline extends System {
 
     public locator          :LocatorGL | undefined;
@@ -39,7 +38,7 @@ class RenderingPipeline extends System {
         const deg = camera.castCenter?.direction.angle() * (180 / Math.PI);
         //const deg = 0;
 
-        ctx.strokeStyle = 'rgba(255,255,255,0.01)'//'white' : 'red';
+        ctx.strokeStyle = 'rgba(255,255,255,0.01)';
         ctx.lineWidth = 1;
 
         let from = Vector2D.rotate(ray.source, camera.pos, deg);
@@ -95,8 +94,6 @@ class RenderingPipeline extends System {
         this.renderer.render(amount);
 
         ray.direction = direction;
-
-        //this.__kernox.pauseExecution();
 
         return true;
     }

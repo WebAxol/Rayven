@@ -6,9 +6,11 @@ import loader from "./images.js";
 
 const canvas = canvases.canvas3d;
 
-const gl :WebGL2RenderingContext = canvas.getContext("webgl2");
+const gl :WebGL2RenderingContext = canvas.getContext("webgl2") as WebGL2RenderingContext;
 
 const locatorPromise :Promise<unknown> = new Promise( async (resolve,reject) => {
+
+    if(!gl) return reject("Failed to get rendering context");
 
     const _locator = new LocatorGL();
 
@@ -30,10 +32,9 @@ const locatorPromise :Promise<unknown> = new Promise( async (resolve,reject) => 
         lyingFragmentShader
     })
 
-    if( !rectangleVertexShader ||
-        !frontFragmentShader   ||
-        !lyingFragmentShader )          return reject("There was an error at building shaders");
-        
+    if( !rectangleVertexShader || !frontFragmentShader   || !lyingFragmentShader ){
+        return reject("There was an error at building shaders");
+    }
 
     console.log('\x1b[36m',"building programs...");
 
@@ -47,7 +48,9 @@ const locatorPromise :Promise<unknown> = new Promise( async (resolve,reject) => 
         lyingProgram
     })
 
-    if(!frontProgram || !lyingProgram)   return reject("There was an error at building programs");
+    if(!frontProgram || !lyingProgram) {  
+        return reject("There was an error at building programs");
+    }
 
     // Registration of programs at locator for later usage
 
@@ -85,11 +88,10 @@ const locatorPromise :Promise<unknown> = new Promise( async (resolve,reject) => 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, lyingElementBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(3000 * 3 * 8), gl.DYNAMIC_DRAW);
     
-    if( !frontBuffer        ||
-        !frontElementBuffer ||
-        !lyingBuffer        ||
-        !lyingElementBuffer)        return reject("There was an error at creating buffers");
-
+    if( !frontBuffer || !frontElementBuffer || !lyingBuffer || !lyingElementBuffer){        
+        return reject("There was an error at creating buffers");
+    }
+    
     // Registration of buffers at locator for later usage
 
     console.log('\x1b[36m',"allocating buffers...");

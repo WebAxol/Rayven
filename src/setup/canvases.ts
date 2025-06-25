@@ -1,7 +1,7 @@
 import CanvasManager from '../utils/rendering/CanvasManager.js';
 
 interface CanvasDictionary {
-    [ name : string ] : any
+    [ name : string ] : HTMLCanvasElement
 };
 
 const canvases :CanvasDictionary = {

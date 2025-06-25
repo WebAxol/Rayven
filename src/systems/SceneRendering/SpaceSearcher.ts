@@ -6,9 +6,14 @@ class SpaceSearcher{
     private verticalWalls;
     private horizontalWalls;
 
-    constructor(sys : System){
-        this.verticalWalls   = sys.__kernox.collectionManager.get<ArrayList>('rayven.VerticalWalls').toArray();
-        this.horizontalWalls = sys.__kernox.collectionManager.get<ArrayList>('rayven.HorizontalWalls').toArray();
+    constructor(private sys : System){
+        // When the application starts execution, request geometry
+        this.sys.attachToEvent("__start", (e) => { this.loadGeometry() });
+    }
+
+    public loadGeometry(){
+        this.verticalWalls   = this.sys.getCollection<ArrayList>('VerticalWalls').asArray();
+        this.horizontalWalls = this.sys.getCollection<ArrayList>('HorizontalWalls').asArray();
     }
 
     public execute() {}

@@ -14,15 +14,18 @@ class RayCaster {
     private circles!         : Circle[];
 
     constructor( private sys : System ){
-        this.horizontalWalls = this.sys.__kernox.collectionManager.get<ArrayList>('rayven.HorizontalWalls').toArray();
-        this.verticalWalls   = this.sys.__kernox.collectionManager.get<ArrayList>('rayven.VerticalWalls').toArray();
-        this.circles         = this.sys.__kernox.collectionManager.get<ArrayList>('rayven.Circles').toArray();
+        // When the application starts execution, request geometry
+        this.sys.attachToEvent("__start", (e) => { this.loadGeometry() });
+    }
+
+    public loadGeometry(){
+        this.horizontalWalls = this.sys.getCollection<ArrayList>('HorizontalWalls').asArray();
+        this.verticalWalls   = this.sys.getCollection<ArrayList>('VerticalWalls').asArray();
+        this.circles         = this.sys.getCollection<ArrayList>('Circles').asArray();
     }
 
     public castRay(ray : any, indices : { horizontal :number, vertical : number }){
         
-        console.log(this.horizontalWalls);
-
         if(ray.reflected) ray.reflected.active = false;
 
         ray.collidesWith = null;
@@ -49,7 +52,7 @@ class RayCaster {
         ray.reflected.direction = Vector2D.copy(ray.direction);        
         ray.reflected.active    = true;
 
-        const surfaceType = ray.collidesWith.getType();
+        const surfaceType = ray.collidesWith.type;
         const strategy = {
             HorizontalWall : (reflected) => { reflected.direction.y *= -1 },
             VerticalWall   : (reflected) => { reflected.direction.x *= -1 },

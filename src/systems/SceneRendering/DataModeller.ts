@@ -4,6 +4,7 @@ import CONFIG             from "../../config.js";
 import { gl }             from "../../setup/webGL.js";
 import { camera }         from "../../utils/scene/Camera.js";
 import { Circle }         from "../../proto/Circle.js";
+import { System } from "/kernox.js";
 
 type RGBA = [ number, number, number, number ]; 
 type Pair<T> = [ T, T ];
@@ -51,7 +52,7 @@ class DataModeller {
 
     private cache :Cache;
 
-    constructor( private chief ){
+    constructor( private sys : System ){
 
         const head :any = {};
         const n :number = 14;
@@ -79,7 +80,7 @@ class DataModeller {
 
         this.cache = head;
 
-        //this.chief.world.pauseExecution();
+        //this.sys.__kernox.pauseExecution();
     }
 
     /**
@@ -87,7 +88,7 @@ class DataModeller {
     */
     public init(){
 
-        const locator :LocatorGL = this.chief.locator;
+        const locator :LocatorGL = (this.sys as any).locator;
 
         this.frontBuffer        = locator.getBuffer("ARRAY_BUFFER","frontBuffer");
         this.frontElementBuffer = locator.getBuffer("ELEMENT_ARRAY_BUFFER","frontBuffer");
@@ -114,7 +115,7 @@ class DataModeller {
 
         if(collidesAt == null) return 0;
 
-        if(item.getType() == "Circle") return this.mapCylindricalTexture(collidesAt,item);
+        if(item.type == "Circle") return this.mapCylindricalTexture(collidesAt,item);
 
         return this.mapLinearTexture(collidesAt,item);
     }
@@ -128,13 +129,13 @@ class DataModeller {
         
         let percentage :number = 0;
 
-        if(wall.getType() === 'HorizontalWall'){
+        if(wall.type === 'HorizontalWall'){
 
             let wallLength = wall.endX - wall.startX;
             percentage = Math.abs(((collidesAt.x - wall.startX)));
         }
 
-        else if(wall.getType() === 'VerticalWall'){
+        else if(wall.type === 'VerticalWall'){
 
             let wallLength = wall.endY - wall.startY;
             percentage = Math.abs((collidesAt.y - wall.startY));
@@ -150,7 +151,7 @@ class DataModeller {
      */
     private mapCylindricalTexture(collidesAt : Vector2D, cyl : Circle) : number {
 
-        let _angle = Math.ceil(this.chief.world.frame / 1) / 50;
+        let _angle = Math.ceil(this.sys.__kernox.frame / 1) / 50;
 
         const direction = new Vector2D(Math.cos(_angle),Math.sin(_angle));
         const centerToPoint = Vector2D.sub(collidesAt,  cyl.center);
@@ -205,7 +206,7 @@ class DataModeller {
 
                 // If the surface is circular (cylindrical), it will be rendered stripe by stripe
                 
-                stripped = ray.collidesWith.getType() == "Circle";
+                stripped = ray.collidesWith.type == "Circle";
 
                 depth +=  ray.lambda * Math.cos(Math.abs(angle));
 

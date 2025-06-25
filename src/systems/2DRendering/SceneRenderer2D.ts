@@ -1,21 +1,30 @@
 import { ArrayList, System }  from "/kernox.js";
-import Vector2D           from "../../utils/physics/Vector2D.js";
-import { Camera, camera } from "../../utils/scene/Camera.js";
-import canvases           from "../../setup/canvases.js";
+import { Circles, HorizontalWalls, VerticalWalls } from "../../setup/collections.js";
+
+import Vector2D             from "../../utils/physics/Vector2D.js";
+import { camera }           from "../../utils/scene/Camera.js";
+import canvases             from "../../setup/canvases.js";
+
 
 class SceneRenderer2D extends System {
 
-    private horizontalWalls! : ArrayList;
-    private verticalWalls!   : ArrayList;
-    private circles!         : ArrayList;
+    private horizontalWalls! : HorizontalWalls;
+    private verticalWalls!   : VerticalWalls;
+    private circles!         : Circles;
 
-    private ctx   = canvases.canvas2d.getContext('2d');
+    private ctx! : CanvasRenderingContext2D;
     private scale = 1.5 * 3;
 
     public init(){
-        this.horizontalWalls = this.getCollection<ArrayList>('HorizontalWalls');
-        this.verticalWalls   = this.getCollection<ArrayList>('VerticalWalls');
-        this.circles         = this.getCollection<ArrayList>('Circles');
+        
+        const ctx = canvases.canvas2d.getContext('2d');
+
+        if(!ctx) throw Error("Failed to get 2D rendering context to render mini-map");
+
+        this.ctx = ctx;
+        this.horizontalWalls = this.getCollection<HorizontalWalls>('HorizontalWalls');
+        this.verticalWalls   = this.getCollection<VerticalWalls>('VerticalWalls');
+        this.circles         = this.getCollection<Circles>('Circles');
     }
 
     public execute() {
@@ -41,6 +50,7 @@ class SceneRenderer2D extends System {
         if(!camera.castCenter) return;
 
         const deg = camera.castCenter?.direction.angle() * (180 / Math.PI);
+
 
         this.ctx.strokeStyle = `rgba(${wall.color},1)`;
         this.ctx.lineWidth = 1;

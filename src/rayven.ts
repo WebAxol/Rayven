@@ -69,8 +69,8 @@ const scene = [
     
     { type:'Wall', info:[[19, 12],[22, 12], 0.01, '0,255,100'   ]},
     { type:'Wall', info:[[19, 15],[22, 15], 0.01, '0,255,100'   ]},
-    { type:'Wall', info:[[22, 12],[22, 15], 0.01, '255,157,0'    ]},
-    { type:'Wall', info:[[19, 12],[19, 15], 0.01, '255,157,0'    ]},  
+    { type:'Wall', info:[[22, 12],[22, 15], 0.01, '255,157,0'   ]},
+    { type:'Wall', info:[[19, 12],[19, 15], 0.01, '255,157,0'   ]},  
 
     { type : 'Circle', info:[camera.pos        ,0.3,1,'255,0,0' ]},
     { type : 'Circle', info:[{ x : 17, y : 17 },1.0,1,'0, 0, 0' ]}, 
@@ -106,11 +106,3 @@ window.addEventListener('keydown', (e) => {
 console.log(app);
 
 app.execute();
-
-document.addEventListener("dblclick", () => {
-    document.documentElement.requestFullscreen().then((res) => {
-        console.log("XXXXXXXXXXXXXX");
-    }).catch((e) => {
-        console.log(e);
-    });
-});

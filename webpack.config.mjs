@@ -23,5 +23,7 @@ export default {
     optimization : {
         minimize : true,
         minimizer : [new TerserPlugin() ]
-    } 
+    },
+
+    mode: "production"
 };

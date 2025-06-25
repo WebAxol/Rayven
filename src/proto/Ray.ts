@@ -2,6 +2,7 @@ import Vector2D                         from "../utils/physics/Vector2D.js"
 import type { VerticalWall }            from "./VerticalWall.js"
 import type { HorizontalWall }          from "./HorizontalWall.js"
 import type { Entity, PrototypeSchema } from "/kernox";
+import { Circle } from "./Circle.js";
 
 interface Ray extends Entity {
     active     : boolean,
@@ -10,7 +11,7 @@ interface Ray extends Entity {
     source     : Vector2D,
     direction  : Vector2D,
     collidesAt : Vector2D,
-    collidesWith : VerticalWall | HorizontalWall | undefined,
+    collidesWith : VerticalWall | HorizontalWall | Circle | undefined,
     reflected  : undefined | Ray,
 };
 
