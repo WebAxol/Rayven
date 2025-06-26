@@ -25,7 +25,7 @@ app.get('/', (req,res) => { res.status(200).render('index.ejs') } )
 // Public
 
 app.use(express.static(join(__dirname, 'public')));
-app.use(express.static(join(__dirname,'lib/frontend')));
+app.use(express.static(join(__dirname, 'lib')));
 app.use(express.static(join(__dirname, 'vendor')));
 app.use(express.static(join(__dirname, 'dist')));
 

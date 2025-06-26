@@ -1,0 +1,1 @@
+{"version":3,"file":"systems.js","sourceRoot":"","sources":["../../src/setup/systems.ts"],"names":[],"mappings":"AACA,OAAO,WAAW,MAAe,kCAAkC,CAAC;AACpE,OAAO,YAAY,MAAc,mCAAmC,CAAC;AACrE,OAAO,iBAAiB,MAAS,2CAA2C,CAAC;AAC7E,OAAO,eAAe,MAAW,2CAA2C,CAAC;AAE7E,MAAM,CAAC,MAAM,OAAO,GAAG;IACnB,eAAe;IACf,iBAAiB;IACjB,WAAW;IACX,YAAY;CACf,CAAC"}

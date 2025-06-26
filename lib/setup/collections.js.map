@@ -1,0 +1,1 @@
+{"version":3,"file":"collections.js","sourceRoot":"","sources":["../../src/setup/collections.ts"],"names":[],"mappings":"AAGA,OAAO,EAAE,SAAS,EAAE,MAAM,YAAY,CAAC;AAEvC,MAAM,OAAO,eAAgB,SAAQ,SAAyB;CAAG;AAAA,CAAC;AAClE,MAAM,OAAO,aAAgB,SAAQ,SAAuB;CAAK;AAAA,CAAC;AAClE,MAAM,OAAO,OAAgB,SAAQ,SAAiB;CAAW;AAAA,CAAC;AAElE,MAAM,CAAC,MAAM,WAAW,GAAG;IACvB,eAAe;IACf,aAAa;IACb,OAAO;CACV,CAAC"}
