@@ -27,6 +27,10 @@ class SceneRenderer2D extends System {
         this.circles         = this.getCollection<Circles>('Circles');
     }
 
+    /**
+     * Renders all geometry at the 2D mini-map, including walls and circles, 
+     * relative to the position and angle of the camera
+     */
     public execute() {
         
         this.ctx.fillStyle = 'rgba(0,0,0,1)';
@@ -45,6 +49,10 @@ class SceneRenderer2D extends System {
         }
     };
 
+    /**
+     * Renders an individual wall at the mini-map.
+     * @param wall Entity that implements either HorizontalWall or VerticalWall
+     */
     public renderWall(wall){
 
         if(!camera.castCenter) return;
@@ -72,6 +80,10 @@ class SceneRenderer2D extends System {
         this.ctx.stroke();
     }
 
+    /**
+     * Renders an individual circle at the mini-map.
+     * @param wall Entity that implements Circle
+     */
     public renderCircle(circle){
 
         if(!camera.castCenter) return;

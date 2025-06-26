@@ -1,7 +1,7 @@
 import Vector2D                         from "../utils/physics/Vector2D.js"
 import type { VerticalWall }            from "./VerticalWall.js"
 import type { HorizontalWall }          from "./HorizontalWall.js"
-import type { Entity, PrototypeSchema } from "/kernox";
+import type { Entity, PrototypeSchema } from "/kernox.js";
 import { Circle } from "./Circle.js";
 
 interface Ray extends Entity {

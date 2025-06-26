@@ -17,14 +17,20 @@ class RayCaster {
         // When the application starts execution, request geometry
         this.sys.attachToEvent("__start", (e) => { this.loadGeometry() });
     }
-
-    public loadGeometry(){
+    
+    private loadGeometry(){
         this.horizontalWalls = this.sys.getCollection<ArrayList>('HorizontalWalls').asArray();
         this.verticalWalls   = this.sys.getCollection<ArrayList>('VerticalWalls').asArray();
         this.circles         = this.sys.getCollection<ArrayList>('Circles').asArray();
     }
 
-    public castRay(ray : any, indices : { horizontal :number, vertical : number }){
+    /**
+     * Tests for closest collision of given ray with geometry within the scene, and recursively 
+     * repeats the process for derived rays (reflected or forwarded rays.)
+     * @param ray Entity that implements properties of a Ray to be fired against geometry
+     * @param indices lower bounds precalculated from ray's position between closest horizontal and vertical walls
+     */
+    public castRay(ray : any, indices : { horizontal :number, vertical : number }) : void {
         
         if(ray.reflected) ray.reflected.active = false;
 
@@ -36,10 +42,17 @@ class RayCaster {
 
         if(!wallCollision && !circleCollision) return;
             
-        if(ray.level < 15 &&  ray.collidesWith.opacity < 1 &&this.reflect(ray)) this.castRay(ray.reflected,indices);
+        if(ray.level < 15 &&  ray.collidesWith.opacity < 1 && this.reflect(ray)){ 
+            this.castRay(ray.reflected,indices);
+        }
     }
-
-    public reflect(ray :any) :boolean {
+    /**
+     * Defines a ray which derives from the reflection of the given one, if collided with 
+     * one of the existing surface types. It gets a new ray created if necessary.
+     * @param ray The incident ray
+     * @returns True if a reflection ray emerges (in case of collision with mirror), false otherwise.
+     */
+    private reflect(ray :any) :boolean {
 
         if(!ray.collidesWith) return false;
 
@@ -77,7 +90,7 @@ class RayCaster {
 
         const reflectStrategy = strategy[surfaceType];
 
-        if(!reflectStrategy)  return false;
+        if(!reflectStrategy) return false;
 
         reflectStrategy(ray.reflected);
 
@@ -86,9 +99,14 @@ class RayCaster {
 
     // WARNING: The following function assumes that wall collections are properly sorted in ascending order based on their posX and posY values
 
-    public iterativeWallCollisionTest(ray : Ray, indices : { horizontal :number, vertical : number }) :boolean {
+    private iterativeWallCollisionTest(ray : Ray, indices : { horizontal :number, vertical : number }) :boolean {
 
-        const sense = { x :  ray.direction.x > 0 ? 1 : -1, y :  ray.direction.y > 0 ? 1 : -1  };
+        // Sense indicates to which direction the ray moves (up or down) and (left or right)
+
+        const sense = { 
+            x :  ray.direction.x > 0 ? 1 : -1, 
+            y :  ray.direction.y > 0 ? 1 : -1  
+        };
  
         var wallH, wallV, lambdaH, lambdaV, collision;
 
@@ -96,6 +114,8 @@ class RayCaster {
             (indices.horizontal < this.horizontalWalls.length && sense.y == 1) || (indices.horizontal >= 0 && sense.y == -1) ||
             (indices.vertical   < this.verticalWalls.length   && sense.x == 1) || (indices.vertical   >= 0 && sense.x == -1)
         ){
+
+            // Closest horizontal and vertical walls not processed so far
 
             wallH = this.horizontalWalls[indices.horizontal + (sense.y == 1 ? 1 : 0)];
             wallV = this.verticalWalls[  indices.vertical   + (sense.x == 1 ? 1 : 0)];
@@ -105,7 +125,16 @@ class RayCaster {
 
             if(lambdaV === lambdaH) break;
 
-            collision = (lambdaH < lambdaV) ? CollisionDetector.RayVsHorizontalWall(ray,wallH) : CollisionDetector.RayVsVerticalWall(ray,wallV);
+            // For closest wall (either vertical or horizontal), test for collision
+
+            if(lambdaH < lambdaV){ 
+                collision = CollisionDetector.RayVsHorizontalWall(ray,wallH);
+            }
+            else{ 
+                collision = CollisionDetector.RayVsVerticalWall(ray,wallV);
+            }
+            
+            // If there was a collision, assign data to ray
 
             if(collision){ 
                 ray.collidesAt   = collision;
@@ -114,6 +143,8 @@ class RayCaster {
                 break;
             }
 
+            // Update indices
+
             indices.horizontal += (lambdaH <= lambdaV) ? sense.y : 0;
             indices.vertical   += (lambdaH >= lambdaV) ? sense.x : 0;
         };
@@ -121,7 +152,7 @@ class RayCaster {
         return collision ? true : false;
     }
 
-    private testAgainstCircles(ray) :boolean {
+    private testAgainstCircles(ray : Ray) :boolean {
 
         var collided = false, collision;
 

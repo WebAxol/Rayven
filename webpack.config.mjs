@@ -12,7 +12,7 @@ export default {
     },
     resolve : {
         alias : {
-            "/kernox.js" : path.resolve(__dirname,'vendor/kernox.min.js')
+            "/kernox.js" : path.resolve(__dirname,'vendor/kernox.js')
         }
     },
 

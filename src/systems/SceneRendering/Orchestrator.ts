@@ -36,7 +36,6 @@ class RenderingPipeline extends System {
         if(!camera.castCenter) return;
 
         const deg = camera.castCenter?.direction.angle() * (180 / Math.PI);
-        //const deg = 0;
 
         ctx.strokeStyle = 'rgba(255,255,255,0.01)';
         ctx.lineWidth = 1;
