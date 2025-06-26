@@ -1,7 +1,7 @@
 import LocatorGL from "../utils/rendering/LocatorGL.js";
 import BuilderGL from "../utils/rendering/BuilderGL.js";
 import canvases  from "./canvases.js";
-import CONFIG from "../config.js";
+import { rayvenConfig } from "../config.js";
 import loader from "./images.js";
 
 const canvas = canvases.canvas3d;
@@ -20,9 +20,9 @@ const locatorPromise :Promise<unknown> = new Promise( async (resolve,reject) => 
 
     console.log('\x1b[36m',"building shaders...");
 
-    const rectangleVertexShader :WebGLShader | void = await BuilderGL.buildShader(gl, "VERTEX_SHADER",   "./shaders/rect.vert");
-    const frontFragmentShader   :WebGLShader | void = await BuilderGL.buildShader(gl, "FRAGMENT_SHADER", "./shaders/front.frag");
-    const lyingFragmentShader   :WebGLShader | void = await BuilderGL.buildShader(gl, "FRAGMENT_SHADER", "./shaders/lying.frag");
+    const rectangleVertexShader :WebGLShader | void = await BuilderGL.buildShader(gl, "VERTEX_SHADER",   rayvenConfig.shaders.vertexShader);
+    const frontFragmentShader   :WebGLShader | void = await BuilderGL.buildShader(gl, "FRAGMENT_SHADER", rayvenConfig.shaders.frontFragmentShader);
+    const lyingFragmentShader   :WebGLShader | void = await BuilderGL.buildShader(gl, "FRAGMENT_SHADER", rayvenConfig.shaders.lyingFragmentShader);
 
     console.log("\n\n");
     console.log("%c[WebGL DEBUG]: shaders' status","color : skyblue")

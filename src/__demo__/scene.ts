@@ -2,8 +2,11 @@ import { Kernox } from '/kernox.js';
 import { rayven } from '../rayven.js';
 import { camera } from '../utils/scene/Camera.js';
 import SceneBuilder from '../utils/scene/SceneBuilder.js';
+import { rayvenConfig } from '../config.js';
 
 const app : Kernox = new Kernox();
+
+rayvenConfig.resolution = 600;
 
 app.use(rayven);
 
@@ -56,10 +59,10 @@ const scene = [
     { type:'Wall', info:[[16.5,7],[16.5,10],0.1, '255,0,255'    ]},
     { type:'Wall', info:[[16.5,10],[17,10],1, '255,155,200'     ]},
     
-    { type:'Wall', info:[[19, 12],[22, 12], 0.01, '0,255,100'   ]},
-    { type:'Wall', info:[[19, 15],[22, 15], 0.01, '0,255,100'   ]},
-    { type:'Wall', info:[[22, 12],[22, 15], 0.01, '255,157,0'   ]},
-    { type:'Wall', info:[[19, 12],[19, 15], 0.01, '255,157,0'   ]},  
+    { type:'Wall', info:[[19, 12],[22, 12], 0.5, '0,255,100'   ]},
+    { type:'Wall', info:[[19, 15],[22, 15], 0.5, '0,255,100'   ]},
+    { type:'Wall', info:[[22, 12],[22, 15], 0.5, '255,157,0'   ]},
+    { type:'Wall', info:[[19, 12],[19, 15], 0.5, '255,157,0'   ]},  
 
     { type : 'Circle', info:[camera.pos        ,0.3,1,'255,0,0' ]},
     { type : 'Circle', info:[{ x : 17, y : 17 },1.0,1,'0, 0, 0' ]}, 

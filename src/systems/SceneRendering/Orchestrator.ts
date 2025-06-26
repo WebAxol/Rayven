@@ -9,7 +9,7 @@ import { locatorPromise } from "../../setup/webGL.js";
 import { camera }         from "../../utils/scene/Camera.js";
 import { Ray }            from "../../proto/Ray.js";
 import Vector2D           from "../../utils/physics/Vector2D.js";
-import CONFIG             from "../../config.js";
+import { rayvenConfig }   from "../../config.js";
 
 import canvases           from "../../setup/canvases.js";
 
@@ -67,13 +67,13 @@ class RenderingPipeline extends System {
         const wallIndices = this.spaceSearcher.getIndicesOfClosest(camera);
 
         const ray : Ray                = camera.castEdge;
-        const rotationAngle  :number   = (camera.FOV / CONFIG.resolution) * (Math.PI / 180) * -1;
+        const rotationAngle  :number   = (camera.FOV / rayvenConfig.resolution) * (Math.PI / 180) * -1;
         const complexRotator :number[] = [ Math.cos(rotationAngle), Math.sin(rotationAngle) ];
         const direction = Vector2D.copy(ray.direction);
 
         this.dataModeller.reset();
 
-        for(let i = 0; i < CONFIG.resolution; i++){
+        for(let i = 0; i < rayvenConfig.resolution; i++){
 
             ray.direction.complexRotate(complexRotator);
 
