@@ -5,18 +5,25 @@ import path from "path";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default {
-    entry   : "./lib/Mirroware.js",
+    entry   : "./lib/rayven.js",
     output  : {
         path : path.resolve(__dirname,'dist'),
-        filename : 'Mirroware.min.js'
+        filename : 'rayven.min.js'
     },
     resolve : {
         alias : {
-            "/pluglightjs/World.js" : path.resolve(__dirname,'vendor/pluglightjs/World.js')
+            "/kernox.js" : path.resolve(__dirname,'vendor/kernox.js')
         }
     },
+
+    experiments: {
+        outputModule: true
+    },
+
     optimization : {
         minimize : true,
         minimizer : [new TerserPlugin() ]
-    } 
+    },
+
+    mode: "production"
 };

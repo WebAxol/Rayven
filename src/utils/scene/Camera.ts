@@ -1,6 +1,6 @@
-import { Ray }           from '../../types/Ray.js';
+import { Ray }           from '../../proto/Ray.js';
 import Vector2D          from './../physics/Vector2D.js';
-import World             from '/pluglightjs/World.js';
+import { Kernox }        from '/kernox.js';
 
 class Camera {
 
@@ -21,7 +21,7 @@ class Camera {
         this.pos  = new Vector2D(NaN,NaN);
     };
 
-    public init(app : World, info : any) :boolean {
+    public init(app : Kernox, info : any) :boolean {
 
         var { x, y, fov, dx, dy } = info;
 
@@ -34,21 +34,17 @@ class Camera {
             return false;
         }
 
-        camera.castCenter = app.createAgent('Ray', { 
-            info : { 
-                source    : camera.pos,
-                direction : Vector2D.normalize(new Vector2D(dx,dy))
-            }
+        camera.castCenter = app.entityFactory.create<Ray>('Ray', { 
+            source    : camera.pos,
+            direction : Vector2D.normalize(new Vector2D(dx,dy))
         });
         
-        camera.castEdge = app.createAgent('Ray', { 
-            info : { 
-                source    : camera.pos,
-                direction : Vector2D.complexRotate(
-                    Vector2D.normalize(new Vector2D(dx,dy)), 
-                    [ Math.cos(camera.FOV * Math.PI / 360), Math.sin(camera.FOV * Math.PI / 360 ) ]
-                ) 
-            }
+        camera.castEdge = app.entityFactory.create<Ray>('Ray', { 
+            source    : camera.pos,
+            direction : Vector2D.complexRotate(
+                Vector2D.normalize(new Vector2D(dx,dy)), 
+                [ Math.cos(camera.FOV * Math.PI / 360), Math.sin(camera.FOV * Math.PI / 360 ) ]
+            ) 
         });
 
         return this.initialized = true;
