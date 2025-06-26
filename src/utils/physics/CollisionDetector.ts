@@ -6,7 +6,6 @@ import Vector2D           from './Vector2D.js';
 
 class CollisionDetector {
 
-
     public static RayVsVerticalLine(ray : Ray, x: number) : number | false {
         
         const lambda :number = (x - ray.source.x) / ray.direction.x;
@@ -15,7 +14,7 @@ class CollisionDetector {
 
     }
 
-
+    
     public static RayVsVerticalWall(ray : Ray ,wall : VerticalWall) : Vector2D | false {
 
         const lambda :number | false = CollisionDetector.RayVsVerticalLine(ray, wall.posX); 

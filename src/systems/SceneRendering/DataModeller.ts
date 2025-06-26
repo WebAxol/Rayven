@@ -1,6 +1,6 @@
 import LocatorGL          from "../../utils/rendering/LocatorGL.js";
 import Vector2D           from "../../utils/physics/Vector2D.js";
-import CONFIG             from "../../config.js";
+import { rayvenConfig }             from "../../config.js";
 import { gl }             from "../../setup/webGL.js";
 import { camera }         from "../../utils/scene/Camera.js";
 import { Circle }         from "../../proto/Circle.js";
@@ -171,7 +171,7 @@ class DataModeller {
         if(!this.initialized) this.init();  // Initialize buffers if not already
    
         const znear      = 1 / Math.tan(camera.FOV * Math.PI / 360);
-        const deltaAngle = (camera.FOV / CONFIG.resolution) * (Math.PI / 180) * -1;
+        const deltaAngle = (camera.FOV / rayvenConfig.resolution) * (Math.PI / 180) * -1;
 
         var cache :Cache | undefined = this.cache;
 
@@ -211,7 +211,7 @@ class DataModeller {
                 depth +=  ray.lambda * Math.cos(Math.abs(angle));
 
                 currentY = 0.01 + znear / depth;
-                currentX = Math.tan(angle - deltaAngle) * znear * ((index <= CONFIG.resolution / 2) ? -1 : 1);
+                currentX = Math.tan(angle - deltaAngle) * znear * ((index <= rayvenConfig.resolution / 2) ? -1 : 1);
                 currentT = this.mapTexture(ray.collidesAt, ray.collidesWith);
                 currentColor = (ray.collidesWith ?  ray.collidesWith.color + `,${ray.collidesWith.opacity}` : "0,0,0,1")
                     .split(',')
@@ -222,7 +222,7 @@ class DataModeller {
             // Variable "cut" indicates if the current element has been iterated completely or stripped is true, 
             // when cut is true, the current trapezium is delimited and a new adjacent one begins
 
-            cut = cache.itemID >= 0 && (cut || (cache.itemID !== itemID || index === CONFIG.resolution - 1 || cache.stripped));
+            cut = cache.itemID >= 0 && (cut || (cache.itemID !== itemID || index === rayvenConfig.resolution - 1 || cache.stripped));
 
             if(cut){
                 
@@ -250,30 +250,34 @@ class DataModeller {
                 .map((i) => {  return i + (this.memoryIndex - level) * 4 })
                 ).concat(frontElement.map((i) => { return i + 4 }));
 
+                // Vertex configuration at triangles differs when trapezium exceeds screen height limits
+                // If left edge exceeds screen, while right edge is within normalized dimensions, set fix to one
+                const fix = y[0] > 1 && y[1] < 1 ? 1 : 0;
+
                 lyingSurf = [
                     //  Ceiling
-                    x[0] * z[0] , l[0] * z[0] ,z[0],  1,
-                    x[1] * z[1] , l[1] * z[1] ,z[1],  1,
-                    x[1] * z[0] , y[1] * z[0] ,z[0],  1,
-                    x[0] * z[1] , y[0] * z[1] ,z[1],  1, 
+                    x[0] * z[0], l[0] * z[0] ,z[0],  1,
+                    x[1] * z[1], l[1] * z[1] ,z[1],  1,
+                    x[1] * z[0], y[1] * z[0] ,z[0],  1,
+                    x[0] * z[1], y[0] * z[1] ,z[1],  1, 
                     //  Floor
-                    x[0] * z[0] ,-y[0] * z[0] ,z[0], -1,
-                    x[1] * z[1] ,-y[1] * z[1] ,z[1], -1,
-                    x[1] * z[1] ,-l[1] * z[1] ,z[1], -1,
-                    x[0] * z[0] ,-l[0] * z[0] ,z[0], -1,
+                    x[0] * z[0],-l[0] * z[0] ,z[0], -1,
+                    x[1] * z[1],-l[1] * z[1] ,z[1], -1,
+                    x[1] * z[1],-y[1] * z[1] ,z[1], -1,
+                    x[0] * z[0],-y[0] * z[0] ,z[0], -1,
                 ]
                 .concat(lyingSurf);    
 
                 lyingElement = [
-                    0, 1, 2, 
-                    0, 3, 2,
+                    0, 1, 2 + fix, 
+                    0 + fix, 2, 3,
 
-                    4, 5, 6,
-                    4, 7, 6
+                    4, 5, 6 + fix,
+                    4 + fix, 6, 7
                 ]
                 .map((i) => {  return i + (this.memoryIndex - level) * 8 })
                 .concat(lyingElement.map((i) => { return i + 8 }));
-
+    
                 // Set first edge after cut
 
                 cache.itemID = itemID; 
