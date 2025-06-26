@@ -6,24 +6,6 @@ import Vector2D           from './Vector2D.js';
 
 class CollisionDetector {
 
-
-    public static segmentVsSegment(x1, x2, y1, y2, l1, l2) {
-        const dy = y2 - y1;
-        const dl = l2 - l1;
-        const denom = dy - dl;
-    
-        if (denom === 0) return null; // Segmentos paralelos, no se cruzan (o coinciden)
-    
-        const t = (l1 - y1) / denom;
-    
-        if (t < 0 || t > 1) return null; // Intersección fuera del rango
-    
-        const x = x1 + t * (x2 - x1);
-        const y = y1 + t * dy;
-    
-        return [x, y];
-    }
-
     public static RayVsVerticalLine(ray : Ray, x: number) : number | false {
         
         const lambda :number = (x - ray.source.x) / ray.direction.x;
@@ -32,7 +14,7 @@ class CollisionDetector {
 
     }
 
-
+    
     public static RayVsVerticalWall(ray : Ray ,wall : VerticalWall) : Vector2D | false {
 
         const lambda :number | false = CollisionDetector.RayVsVerticalLine(ray, wall.posX); 

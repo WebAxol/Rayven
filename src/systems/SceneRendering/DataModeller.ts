@@ -250,30 +250,30 @@ class DataModeller {
                 .map((i) => {  return i + (this.memoryIndex - level) * 4 })
                 ).concat(frontElement.map((i) => { return i + 4 }));
 
-                if(Math.sign(y[0]) != Math.sign(y[1])){
-                    
-                }
+                // Vertex configuration at triangles differs when trapezium exceeds screen height limits
+                // If left edge exceeds screen, while right edge is within normalized dimensions, set fix to one
+                const fix = y[0] > 1 && y[1] < 1 ? 1 : 0;
 
                 lyingSurf = [
                     //  Ceiling
-                    x[0] * z[0] , l[0] * z[0] ,z[0],  1,
-                    x[1] * z[1] , l[1] * z[1] ,z[1],  1,
-                    x[1] * z[0] , y[1] * z[0] ,z[0],  1,
-                    x[0] * z[1] , y[0] * z[1] ,z[1],  1, 
+                    x[0] * z[0], l[0] * z[0] ,z[0],  1,
+                    x[1] * z[1], l[1] * z[1] ,z[1],  1,
+                    x[1] * z[0], y[1] * z[0] ,z[0],  1,
+                    x[0] * z[1], y[0] * z[1] ,z[1],  1, 
                     //  Floor
-                    x[0] * z[0] ,-y[0] * z[0] ,z[0], -1,
-                    x[1] * z[1] ,-y[1] * z[1] ,z[1], -1,
-                    x[1] * z[1] ,-l[1] * z[1] ,z[1], -1,
-                    x[0] * z[0] ,-l[0] * z[0] ,z[0], -1,
+                    x[0] * z[0],-l[0] * z[0] ,z[0], -1,
+                    x[1] * z[1],-l[1] * z[1] ,z[1], -1,
+                    x[1] * z[1],-y[1] * z[1] ,z[1], -1,
+                    x[0] * z[0],-y[0] * z[0] ,z[0], -1,
                 ]
                 .concat(lyingSurf);    
 
                 lyingElement = [
-                    0, 1, 2, 
-                    0, 3, 2,
+                    0, 1, 2 + fix, 
+                    0 + fix, 2, 3,
 
-                    4, 5, 6,
-                    4, 7, 6
+                    4, 5, 6 + fix,
+                    4 + fix, 6, 7
                 ]
                 .map((i) => {  return i + (this.memoryIndex - level) * 8 })
                 .concat(lyingElement.map((i) => { return i + 8 }));
