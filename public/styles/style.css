@@ -69,8 +69,8 @@ header{
     top: 0;
     width: 100%;
     min-height: 1000px;
-    /*background-color: rgba(0, 255, 238, 0.01);
-    background: linear-gradient(0deg, rgba(0,0,0,0.2) 0%, rgba(9,50,9,0.2) 34%, rgba(33, 214, 251, 0.5) 100%);*/
+    background-color: rgba(0, 255, 238, 0.01);
+    background: linear-gradient(0deg, rgba(255, 1, 1, 0.2) 0%, rgba(255, 0, 34, 0.2) 34%, rgba(33, 214, 251, 0.3) 100%);
     padding: 50px;
 }
 

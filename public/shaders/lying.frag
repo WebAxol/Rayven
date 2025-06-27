@@ -1,6 +1,8 @@
 precision mediump float;
 
-uniform sampler2D sampler;
+uniform sampler2D floorTexture;
+uniform sampler2D skyTexture;
+
 uniform vec3  u_cameraPosition;
 uniform float u_cameraAngle;
 uniform float u_time;
@@ -8,8 +10,9 @@ uniform vec2  u_resolution;
 
 varying float v_height; 
 
-// Linear Transformations
+const float PI = 3.14159265359;
 
+// Linear Transformations
 
 vec3 rotateX(vec3 v, float angle){
 
@@ -21,7 +24,6 @@ vec3 rotateX(vec3 v, float angle){
 
     return rotationX * v;
 }
-
 
 vec3 rotateY(vec3 v, float angle){
 
@@ -97,32 +99,6 @@ float opSmoothIntersection( float d1, float d2, float k )
 
 // Ray Marching scene setup
 
-float rand(vec2 co){
-    return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
-}
-
-vec3 rayDirection; 
-
-vec3 tileCoords(vec3 p,float cellSize){
-    return  floor(p / cellSize);
-}
-
-vec3 voxelCoord(vec3 p, float voxelSize){
-    return floor(p / voxelSize) * voxelSize;
-}
-
-float voxelDistance(vec3 p, float d, float voxelSize){
-    
-    vec3 surfacePoint = p + rayDirection * d; 
-    
-    vec3 currentVoxel = floor(p / voxelSize);
-    vec3 surfaceVoxel = floor(surfacePoint / voxelSize);
-
-    // If they are the same voxel, return distance of zero, otherwise, return the original distance
-
-    return (currentVoxel == surfaceVoxel) ? 0.0 : d;
-}
-
 float map(vec3 p) {
 
     p.y -= 5.0;
@@ -147,20 +123,80 @@ float map(vec3 p) {
     float size = 1.0;
 
 
-    p = mod(-1.0 * abs(p),50.0);
-
-    //p = alignToVoxelGrid(p,3.0);
+    p = mod(-1.0 * abs(p),150.0);
 
     p = floor(p / size) * size;
 
     res = opSmoothUnion(res,sdSphere(p, sp2),15.0);
 
-    //res = voxelDistance(p,res,3.0);
-
-
     float t = u_time / 5.0;
 
     return res;
+}
+
+// Sky sphere
+
+float intersectSphere(vec3 rayDir, vec3 center, float radius) {
+    vec3 oc = u_cameraPosition - center;
+    float b = dot(oc, rayDir);
+    float c = dot(oc, oc) - radius * radius;
+    float h = b * b - c;
+    if (h < 0.0) return -1.0;
+    return -b - sqrt(h);
+}
+
+vec2 getSkyUV(vec3 hitPoint) {
+    vec3 p = normalize(hitPoint); // dirección desde el centro
+
+    float theta = atan(p.z, p.x);
+    float phi   = acos(clamp(p.y, -1.0, 1.0));
+    float u = theta / (2.0 * PI) + 0.5; 
+    float v = phi / PI;
+    return vec2(-u, -v);
+}
+
+bool renderSky(vec3 rayDir) {
+
+    vec3 center = vec3(0.0,0.0,0);
+
+    float radius = 200.0;         // grande pero finito
+
+    float t = intersectSphere(rayDir, center, radius);
+
+    if(t > 0.0) return false;
+
+    vec3 hitPoint = u_cameraPosition + rayDir * t;
+    vec2 uv = getSkyUV(hitPoint);
+
+    gl_FragColor = texture2D(skyTexture, uv);
+    return true;
+}
+
+bool marchRay(vec3 rayDir){
+
+    vec3 col;
+    float t = 0.0;
+    float d;
+
+    for(float i = 0.0; i < 80.0; i++){
+
+        vec3  p = u_cameraPosition + rayDir * t;
+
+        p.y /= 1.5;
+
+        d = map(p);   
+
+        t += d;
+
+        if (d <= 0.1){
+            col = vec3(mod(t/30.0,3.0),mod(t/30.0,2.0),1) / t * 20.2;   
+            gl_FragColor = vec4(col, 0.05 *i);
+            return true;
+        }
+        if (t > 500.) break; // early stop if too far
+    }
+
+    return false;
 }
 
 void main() {
@@ -172,9 +208,9 @@ void main() {
 
     vec2 normalizedCoord = (2.0 * gl_FragCoord.xy - u_resolution) / u_resolution;
     
-    rayDirection  =   vec3(normalizedCoord.xy, znear);
+    vec3 rayDir  =   vec3(normalizedCoord.xy, znear);
 
-    rayDirection /= length(rayDirection); // Normalized ray direction
+    rayDir /= length(rayDir); // Normalized ray direction
 
     float u_cameraAngle = -u_cameraAngle + radians(90.0);
     
@@ -184,15 +220,15 @@ void main() {
         sin(u_cameraAngle),0,  cos(u_cameraAngle)
     );
     
-    rayDirection =  rotateY(rayDirection,u_cameraAngle); // Transformed ray direction
+    rayDir =  rotateY(rayDir,u_cameraAngle); // Transformed ray direction
     
     // Ceiling/floor Texture Rendering
 
-    float lambda = abs(1.0 / rayDirection.y);
+    float lambda = abs(1.0 / rayDir.y);
 
-    vec3  textureCoord = (u_cameraPosition) + (rayDirection * lambda) + vec3(900.0,900.0,1.0) * 0.5;
+    vec3  textureCoord = (u_cameraPosition) + (rayDir * lambda) + vec3(900.0,900.0,1.0) * 0.5;
 
-    float minLight = 0.2;
+    float minLight = 0.4;
     float maxLight = 3.0;
     float lightIndex = 5.0;
     float depth = gl_FragCoord.w;
@@ -200,7 +236,7 @@ void main() {
     float lightLevel = min(max(lightIndex / pow(lambda,2.0),minLight), maxLight);
     
     vec2 texCoord = vec2(textureCoord.x,textureCoord.z);
-    vec4 texColor = texture2D(sampler, texCoord);
+    vec4 texColor = texture2D(floorTexture, texCoord);
 
     vec4 mixed  = mix(texColor, vec4(vec3(255, 180, 0) / 255.0, 0.01),0.1);
     vec4 shaded = mix(vec4(0,0,0,1), mixed, lightLevel);
@@ -215,27 +251,8 @@ void main() {
     }
 
     // Background Ambientation (RayMarching)
+    
+    //if(marchRay(rayDir)) return;
 
-    vec3 col;
-    float t = 0.0;
-    float d;
-
-    for(float i = 0.0; i < 80.0; i++){
-
-        vec3  p = u_cameraPosition + rayDirection * t;
-
-        p.y /= 1.5;
-
-        d = map(p);   
-
-        t += d;
-
-        if (d <= 0.1){
-            col = vec3(mod(t/30.0,3.0),mod(t/30.0,2.0),1) / t * 20.2;   
-            gl_FragColor = vec4(col, 0.05 *i);
-            break;
-        }
-        if (t > 500.) break;      // early stop if too far
-    }
-
+    renderSky(rayDir);
 }
