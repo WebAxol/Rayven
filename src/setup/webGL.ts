@@ -112,10 +112,11 @@ const locatorPromise :Promise<unknown> = new Promise( async (resolve,reject) => 
     
     // Textures
 
-    const texture :WebGLTexture | null = gl.createTexture();
+    const floorTexture :WebGLTexture | null = gl.createTexture();
     const bricks   :any = loader.get("bricks");
 
-    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, floorTexture);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
@@ -125,6 +126,26 @@ const locatorPromise :Promise<unknown> = new Promise( async (resolve,reject) => 
         gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
         gl.UNSIGNED_BYTE, bricks
     )
+
+    gl.uniform1i(gl.getUniformLocation(lyingProgram, "floorTexture"), 0);
+
+    const skyTexture :WebGLTexture | null = gl.createTexture();
+    const sky   :any = loader.get("sky");
+
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, skyTexture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+    gl.texImage2D(
+        gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
+        gl.UNSIGNED_BYTE, sky
+    )
+
+    gl.uniform1i(gl.getUniformLocation(lyingProgram, "skyTexture"), 1);
+
 
     return resolve(_locator);
 })

@@ -16,7 +16,7 @@ void main() {
 
     vec4 mixed = mix(texColor,v_color,0.5);
 
-    float minLight = 0.2;
+    float minLight = 0.5;
     float maxLight = 2.0;
     float lightIndex = 5.0;
 
