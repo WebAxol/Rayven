@@ -12,17 +12,37 @@ varying float v_height;
 
 const float PI = 3.14159265359;
 
+// RayMarching Operators
+
+float opUnion( float d1, float d2 )
+{
+    return min(d1,d2);
+}
+float opSubtraction( float d1, float d2 )
+{
+    return max(-d1,d2);
+}
+float opIntersection( float d1, float d2 )
+{
+    return max(d1,d2);
+}
+
+float opSmoothUnion( float d1, float d2, float k )
+{
+    float h = clamp( 0.5 + 0.5*(d2-d1)/k, 0.0, 1.0 );
+    return mix( d2, d1, h ) - k*h*(1.0-h);
+}
+
 // Linear Transformations
 
-vec3 rotateX(vec3 v, float angle){
-
-    mat3 rotationX = mat3(
-        1,cos(angle), -sin(angle),
-        0,sin(angle), cos(angle),
-        0,0,  1
+vec3 rotateX(vec3 p, float angle) {
+    float c = cos(angle);
+    float s = sin(angle);
+    return vec3(
+        p.x,
+        c * p.y - s * p.z,
+        s * p.y + c * p.z
     );
-
-    return rotationX * v;
 }
 
 vec3 rotateY(vec3 v, float angle){
@@ -48,6 +68,24 @@ struct Sphere {
     float radius;
 };
 
+struct Capsule {
+    vec3 a;
+    vec3 b;
+    float r;
+};
+
+struct RoundCyl{
+    vec3 pos;
+    float ra;
+    float rb;
+    float h;
+};
+
+struct Screw{
+    vec3 pos;
+    float scale;
+};
+
 // Distance Functions
 
 float sdSphere(vec3 p, Sphere spr){
@@ -60,76 +98,57 @@ float sdBox( vec3 p, Box b ){
     return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
 }
 
-// RayMarching Operators
-
-float opUnion( float d1, float d2 )
-{
-    return min(d1,d2);
-}
-float opSubtraction( float d1, float d2 )
-{
-    return max(-d1,d2);
-}
-float opIntersection( float d1, float d2 )
-{
-    return max(d1,d2);
-}
-float opXor(float d1, float d2 )
-{
-    return max(min(d1,d2),-max(d1,d2));
+float sdCapsule( vec3 p, Capsule cap){
+  vec3 pa = p - cap.a, ba = cap.b - cap.a;
+  float h = clamp( dot(pa,ba)/dot(ba,ba), 0.0, 1.0 );
+  return length( pa - ba*h ) - cap.r;
 }
 
-float opSmoothUnion( float d1, float d2, float k )
-{
-    float h = clamp( 0.5 + 0.5*(d2-d1)/k, 0.0, 1.0 );
-    return mix( d2, d1, h ) - k*h*(1.0-h);
+float sdRoundedCylinder( vec3 p, RoundCyl rc ){
+    vec3 trans_p = p - rc.pos;
+    vec2 d = vec2( length(trans_p.xz)-2.0*rc.ra + rc.rb, abs(trans_p.y) - rc.h );
+    return min(max(d.x,d.y),0.0) + length(max(d,0.0)) - rc.rb;
 }
 
-float opSmoothSubtraction( float d1, float d2, float k )
-{
-    float h = clamp( 0.5 - 0.5*(d2+d1)/k, 0.0, 1.0 );
-    return mix( d2, -d1, h ) + k*h*(1.0-h);
-}
+float sdScrew( vec3 p, Screw s){
+    
+    Box      body = Box(s.pos, vec3(1.0,8.0,1.0));
+    RoundCyl head = RoundCyl(s.pos + vec3(0.0,8.0,0.0),2.0,1.0,1.0);
+    Box     line1 = Box(s.pos + vec3(0.0,10.0,0.0), vec3(0.5,1.0,2.0));
+    Box     line2 = Box(s.pos + vec3(0.0,10.0,0.0), vec3(2.0,1.0,0.5));
 
-float opSmoothIntersection( float d1, float d2, float k )
-{
-    float h = clamp( 0.5 - 0.5*(d2-d1)/k, 0.0, 1.0 );
-    return mix( d2, d1, h ) + k*h*(1.0-h);
+    vec3 p1 = (rotateY((p - body.pos) / s.scale,(p.y + u_time / 10.0) / s.scale) + body.pos);
+    
+    float res = 1000.0;    
+    res = opUnion(res,sdBox(p1,body));
+    res = opUnion(res,sdRoundedCylinder(p1,head));
+
+    vec3 p2 = (p - body.pos) / s.scale + body.pos; 
+
+    res = opSubtraction(sdBox(p2,line1),res);
+    res = opSubtraction(sdBox(p2,line2),res);
+
+
+    res *= s.scale;
+
+    return res;
 }
 
 // Ray Marching scene setup
 
 float map(vec3 p) {
 
-    p.y -= 5.0;
+    p.y -= 1.0;
 
-    Box  b1 = Box(vec3(15.0,10.0,15.0), vec3(2.0,2.0,2.0));
-    Box  b2 = Box(vec3(15.0,10.0,0.0), vec3(2.0,2.0,2.0));
-
-
-    Sphere sp2 = Sphere(vec3(15.0- cos(u_time / 30.0) * 0.0,10.0 - sin(u_time / 30.0) * 5.0,15.0 - sin(u_time / 30.0) * 5.0),20.0);
+    Sphere sp = Sphere(vec3(20.0,5.0,1.0),1.0);
+    Screw  s1 = Screw(vec3(20.0,5.0,1.0),0.3);
 
     float res = 1000.0;
 
-    p.xz += u_time / 10.0;
-    vec3 p2 = p;
+    p = rotateY(p,u_time / 30.0);
+    p = rotateX(p - s1.pos,u_time / 30.0) + s1.pos;
 
-    p2.z -= 15.0;
-    p2 = mod(-abs(p2),30.0);
-    
-    res = opSmoothUnion(res,sdBox(p2,b1),5.0);
-    res = opSmoothUnion(res,sdBox(p2,b2),5.0);
-
-    float size = 1.0;
-
-
-    p = mod(-1.0 * abs(p),150.0);
-
-    p = floor(p / size) * size;
-
-    res = opSmoothUnion(res,sdSphere(p, sp2),15.0);
-
-    float t = u_time / 5.0;
+    res = opUnion(res, sdScrew(p,s1));
 
     return res;
 }
@@ -188,7 +207,7 @@ bool marchRay(vec3 rayDir){
 
         t += d;
 
-        if (d <= 0.1){
+        if (d <= 0.01){
             col = vec3(mod(t/30.0,3.0),mod(t/30.0,2.0),1) / t * 20.2;   
             gl_FragColor = vec4(col, 0.05 *i);
             return true;
@@ -252,7 +271,7 @@ void main() {
 
     // Background Ambientation (RayMarching)
     
-    //if(marchRay(rayDir)) return;
+    if(marchRay(rayDir)) return;
 
     renderSky(rayDir);
 }
